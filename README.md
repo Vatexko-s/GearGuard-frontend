@@ -1,7 +1,7 @@
 # Informačná Architektúra Inventárnej Aplikácie
 
 ## Prehľad
-Aplikácia na správu inventára obsahuje frontend vyvinutý v Next.js, ktorý zahŕňa aj API server, a backend postavený na Supabase databáze. Používateľská interakcia prebieha cez dashboard, pričom administrátori majú dodatočné možnosti správy.
+Aplikácia na správu inventára obsahuje frontend vyvinutý v Next.js, ktorý zahŕňa aj API server, a backend postavený na PHP serveri a PostgreSQL databáze. Používateľská interakcia prebieha cez dashboard, pričom administrátori majú dodatočné možnosti správy.
 
 ---
 
@@ -66,16 +66,17 @@ Aplikácia na správu inventára obsahuje frontend vyvinutý v Next.js, ktorý z
 - **Docker:** Áno, cez `Dockerfile` a `docker-compose.yml`
 
 ### Backend
-- **API Routes:** Integrované v Next.js (`pages/api`)
-- **Databáza:** Supabase (PostgreSQL)
+- **API Routes:** PHP server
+- **Databáza:** PostgreSQL
 - **Príklady API Endpointov:**
   - `GET /api/items`
   - `POST /api/borrowing-records`
 
 ### Prostredie
 - **Env Variables:**
-  - `SUPABASE_URL`
-  - `SUPABASE_KEY`
+  - `POSTGRES_URL`
+  - `POSTGRES_USER`
+  - `POSTGRES_PASSWORD`
 
 ---
 
@@ -93,7 +94,7 @@ Aplikácia na správu inventára obsahuje frontend vyvinutý v Next.js, ktorý z
 ## Deployment
 - **Platforma:** Vercel
 - **CI/CD:** Automatický deploy z GitHub repozitára.
-- **Docker:** Použitý na lokálny vývoj a testovanie.
+- **Docker:** Použitý na lokálny vývoj a testovanie s PHP a PostgreSQL.
 
 ---
 
