@@ -85,8 +85,8 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 ### zrušenie rezervácie
 - **Actors:** Používateľ _(požičateľ)_
 - **Description:** Používateľ zruší rezerváciu položiek pred požičaním.
-# TODO !!!
-
+- **Preconditions:** Používateľ je prihlásený, položka je `reserved`, je vytvorená `Reservation`.
+- **Postconditions:** Položky sú označené ako `available`, `Reservation` je zrušená.
 ---
 
 ### správa používateľov
