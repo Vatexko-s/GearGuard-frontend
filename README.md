@@ -27,38 +27,67 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 
 --- 
 
-## Use Cases
+# Use Cases
+
+### prihlásenie
+- **Actors:** Používateľ, Administrátor
+- **Description:** Užívateľ sa prihlási do aplikácie údajmi, ktoré mu administrátor vygenroval - môže sa prihlásiť ako _**Používateľ (požičateľ)**_ alebo _**administrátor**_.
+- **Preconditions:** Používateľ má vygenerovaý účet.
+- **Postconditions:** Používateľ je prihlásený a môže používať aplikáciu.
+- **Main Flow:**
+  - Používateľ otvorí aplikáciu a zvolí možnosť prihlásenia.
+  - Používateľ zadá svoje prihlasovacie údaje.
+  - Aplikácia overí údaje a prihlási používateľa.
+
+---
+
 ### rezervácia položiek z inventára
 - **Actors:** Používateľ (požičateľ)
 - **Description:** Používateľ si môže prezerať inventár a rezervovať si položky v rezervačnom systéme.
-- **Preconditions:** Používateľ je prihlásený, položka je dostupná.
-- **Postconditions:** Položky sú označené ako požičané, je vytvorená "_rezervácia_".
+- **Preconditions:** Používateľ je prihlásený, položka je `available` v čase rezervácie.
+- **Postconditions:** Položky sú označené ako `reserved` - v dátume ktorý používateľ zadal, je vytvorená `Reservation`.
 - **Main Flow:**
   - Používateľ sa prihlási a zvolí si možnosť rezervácie.
   - Používateľ vyhľadáva položky v inventáry a pridáva do "aktuálnej" rezervácie.
   - Používateľ zadá dátum a čas kedy a do kedy chce položky požičať.
   - Používateľ skontroluje či má všetky položky čo potrebuje, a následne potvrdí rezerváciu.
-  - Aplikácia označí položky ako požičané a vytvorí rezerváciu.
-- Kontrola rezervácie: 
-  - Používateľ môže zrušiť rezerváciu kedykoľvek pred začiatkom požičiavania.
-  - Používateľ môže zmeniť dátum a čas požičiavania kedykoľvek pred začiatkom požičiavania, ale treba kontrolovať či budú položky dostupné v danom "zmenenom" čase.
+  - Aplikácia označí položky ako `reserved` a vytvorí `Reservation`.
+
+> [!CAUTION]
+>  - Kontrola rezervácie:
+>   - Používateľ môže zmeniť dátum a čas požičiavania kedykoľvek pred začiatkom požičiavania, ale treba kontrolovať či budú položky dostupné v danom "zmenenom" čase.
+>   - Všeobecne kontrola či je položka `available` v čase ktorý používateľ zadal.
+
 
 ### požičanie položiek s rezerváciou
-- **Actors:** Používateľ (požičateľ)
+- **Actors:** Používateľ _(požičateľ)_
 - **Description:** Používateľ si môže požičať položky s rezerváciou, ktorú si vytvoril v čase ktorý zadal.
-- **Preconditions:** Používateľ je prihlásený, položka je dostupná, rezervácia je vytvorená.
-- **Postconditions:** Položky sú označené ako požičané, rezervácia je označená ako "požičaná", je vytvorené "požičanie".
+- **Preconditions:** Používateľ je prihlásený, položka je `available`, `Reservation` je vytvorená.
+- **Postconditions:** Položky sú označené ako `lent`, rezervácia je archivovaná, je vytvorené `Loan`.
 
-### požičanie položky na mieste
-- **Actors:** Používateľ (požičateľ)
-- **Description:** Používateľ si môže požičať položku na mieste, bez rezervácie ak je položka dostupná.
-- **Preconditions:** Používateľ je prihlásený, položka je dostupná.
-- **Postconditions:** Položky sú označené ako požičané, je vytvorené "požičanie" .
+### požičanie položky na mieste (fast loan)
+- **Actors:** Používateľ _(požičateľ)_
+- **Description:** Používateľ si môže požičať položku na mieste, bez rezervácie ak je položka dostupná, použivateľ zadá aj dátum do kedy si položky požičiava, lebo môže byť vytvorená `Reservation`.
+- **Preconditions:** Používateľ je prihlásený, položka je `available`.
+- **Postconditions:** Položky sú označené ako `lent`, je vytvorené `Loan` .
 
 ---
 
 ### vrátenie požičanej položky
-- **Actors:** Používateľ (požičateľ)
+- **Actors:** Používateľ _(požičateľ)_
+- **Description:** Používateľ vráti požičané položky (očakávanie že sa vráti aj fyzicky).
+- **Preconditions:** Používateľ je prihlásený, položka je `lent`.
+- **Postconditions:** Položky sú označené ako `available`, je vytvorené `Return`.
+
+> [!NOTE]
+> Ak používateľ položky nevráti včas, administrátor to bude vidieť v dashboarde a v tejto fáze bude na ňom ako sa zachvá. (iplementovať notifikácie v budúcnosti)
+
+### zrušenie rezervácie
+- **Actors:** Používateľ _(požičateľ)_
+- **Description:** Používateľ zruší rezerváciu položiek pred požičaním.
+# TODO !!!
+
+---
 
 ### správa používateľov
 - **Actors:** Administrátor
@@ -110,63 +139,90 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
   - Administrátor zobrazí zoznam položiek a ich stav.
   - Aplikácia zobrazí zoznam položiek.
 
-
-
-
-
-
 ---
 
 ## Hlavné Sekcie Aplikácie
 
-### 1. **Prihlasovacia Stránka**
-- **Účel:** Overenie používateľa a umožnenie prístupu k aplikácii.
+#### **navigačné menu**
+- **Účel:** Umožniť používateľom navigovať medzi hlavnými časťami aplikácie.
 - **Obsah:**
+  - Reservations
+  - Loans
+  - Fast Loans
+  - Home
+- nachádza sa vždy na dolnej časti aplikácie (mobil)
+
+---
+
+### 1. **Prihlasovacia Stránka Login**
+- **Účel:** Overenie používateľa a umožnenie prístupu k aplikácii.
+- **Obsah: **
   - Prihlasovací formulár (email, heslo).
-  - Odkaz na obnovenie hesla.
+  - Odkaz na administrátora pri zabudnutom hesle.
 - **API Endpoints:**
-  - `POST /api/auth/login` – Overenie používateľa.
-  - `POST /api/auth/forgot-password` – Obnovenie hesla.
+  - doplniť pri implementácii backendu
 
 ---
 
 ### 2. **Dashboard**
-- **Účel:** Zobrazenie hlavného prehľadu inventára a akcií používateľa.
+- **Účel:** Zobrazenie hlavného prehľadu kategórií.
 - **Obsah:**
-  - Zoznam všetkých položiek inventára.
-  - Tlačidlá pre základné akcie (vyhľadávanie, filtrovanie, požičanie).
-  - Stav položiek (`dostupné`, `požičané`, `údržba`).
+  - Zoznam Kategórií. .
 - **API Endpoints:**
-  - `GET /api/items` – Načítanie všetkých položiek.
-  - `GET /api/items?status=available` – Filtrovanie podľa stavu.
+  - doplniť pri implementácii backendu
 
 ---
 
-### 3. **Detail Položky**
-- **Účel:** Zobraziť podrobnosti o konkrétnej položke a umožniť ďalšie akcie.
+### 3. **Detail Kategórie**
+- **Účel:** Zobraziť položky z konkrétnej kategórie a umožniť ďalšie akcie.
 - **Obsah:**
   - Názov položky.
-  - Popis položky.
-  - Stav položky.
-  - História požičiavania.
-  - Tlačidlá na akcie (požičanie, návrat, údržba).
+  - Stav položky. - forma odtieňa farby položky
+  - detaily položky. - forma tlačidla
 - **API Endpoints:**
-  - `GET /api/items/:id` – Načítanie detailov položky.
-  - `POST /api/borrowing-records` – Požičanie položky.
-  - `PUT /api/items/:id` – Aktualizácia stavu položky.
+  - doplniť pri implementácii backendu
 
 ---
 
-### 4. **Sekcia Pre Administrátora**
+### 4. **Reservations**
+- **Účel:** **Vytvárať**, pri vytvorení => not submitted, **Dokončiť**, pri dokončení z not submitted => submitted, **Zobraziť** rezervácie _**submitted** - už vytvorená rezervácia/**not submitted** - ešte nevytvorená, používateľ ju napĺňa_.
+- **Obsah:**
+  - Zoznam rezervácií.
+  - Formulár na vytvorenie novej rezervácie.
+- **API Endpoints:**
+    - doplniť pri implementácii backendu
+
+---
+
+### 5. **Loans**
+- **Účel:** Zobraziť aktuálne požičané položky a históriu požičaných a možnosť `copy to reservation` - do rezervácie sa pridajú položky ktoré už si raz používateľ požičal, možnosť vrátenia položiek.
+- **Obsah:**
+  - Zoznam požičaných položiek.
+  - Zoznam historických požičaní.
+  - Možnosť vrátenia položiek.
+- **API Endpoints:**
+  - doplniť pri implementácii backendu
+
+---
+
+### 6. **Fast Loans**
+- **Účel:** Umožniť používateľom požičať si položky na mieste bez rezervácie.
+- **Obsah:**
+  - Zoznam položiek.
+  - Formulár na požičanie položiek.
+- **API Endpoints:**
+  - doplniť pri implementácii backendu
+
+---
+
+### 7. **Sekcia Pre Administrátora**
 - **Účel:** Poskytnúť administrátorom nástroje na správu inventára a používateľov.
 - **Obsah:**
   - Formulár na pridávanie nových položiek.
+  - Zoznam položiek s možnosťou editácie.
   - Zoznam používateľov s možnosťou editácie.
-  - Reporty o využití inventára.
 - **API Endpoints:**
-  - `POST /api/items` – Pridanie novej položky.
-  - `GET /api/users` – Načítanie zoznamu používateľov.
-  - `PUT /api/users/:id` – Aktualizácia používateľského účtu.
+  - doplniť pri implementácii backendu
 
 ---
 
@@ -180,37 +236,15 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 ### Backend
 - **API Routes:** PHP server
 - **Databáza:** PostgreSQL
-- **Príklady API Endpointov:**
-  - `GET /api/items`
-  - `POST /api/borrowing-records`
 
 ### Prostredie
 - **Env Variables:**
   - `POSTGRES_URL`
   - `POSTGRES_USER`
   - `POSTGRES_PASSWORD`
-
 ---
-
-## Funkčné Požiadavky
-- **Používatelia:**
-  - Registrácia a prihlásenie.
-  - Zobrazenie a filtrovanie inventára.
-  - Požičiavanie a vracanie položiek.
-- **Administrátori:**
-  - Správa inventára (pridanie, aktualizácia, odstraňovanie položiek).
-  - Správa používateľov.
-
----
-
-## Deployment
-- **Platforma:** Vercel
-- **CI/CD:** Automatický deploy z GitHub repozitára.
-- **Docker:** Použitý na lokálny vývoj a testovanie s PHP a PostgreSQL.
-
----
-
 ## Budúce Rozšírenia
 - Notifikácie používateľom o termínoch vrátenia položiek.
 - Pokročilé štatistiky využitia inventára.
+- Grafické zobrazenie inventára (regálov).
 - Integrácia s QR kódmi (voliteľné).
