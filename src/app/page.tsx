@@ -1,13 +1,10 @@
-'use client'
+import React from 'react'
+import LoginPage from '@/app/(auth)/login/page'
 
-import styles from './page.module.css'
-
-//Login authContext in layout.tsx TODO
-export default function Login() {
+export default function Home() {
   return (
-    <div className={styles.container}>
-      <h1>Login</h1>
-      <p>This is the login page. You can login here.</p>
+    <div className='flex items-center justify-center min-h-screen'>
+      <LoginPage />
     </div>
   )
 }
