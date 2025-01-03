@@ -1,7 +1,7 @@
 import React from 'react'
 import { CogIcon } from '@heroicons/react/24/solid'
 
-const GearGuardLogo: React.FC = () => {
+const StaticLogo: React.FC = () => {
   return (
     <div className='flex items-center space-x-4'>
       <CogIcon className='h-12 w-12 text-blue-500' />
@@ -10,4 +10,4 @@ const GearGuardLogo: React.FC = () => {
   )
 }
 
-export default GearGuardLogo
+export default StaticLogo
