@@ -19,8 +19,7 @@ const SideNav = () => {
           className='flex flex-row space-x-3 items-center justify-center md:justify-start md:px-6 border-b border-zinc-200 h-12 w-full'
         >
           <div>
-            GearGuard
-            {/*<StaticLogo />*/}
+            <StaticLogo />
           </div>
         </Link>
 

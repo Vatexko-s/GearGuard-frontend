@@ -2,14 +2,14 @@ import React from 'react'
 
 const dashboard = () => {
   return (
-    <>
-      <div className='border-dashed border border-zinc-500 w-full h-12 rounded-lg'></div>
-      <div className='border-dashed border border-zinc-500 w-full h-64 rounded-lg'></div>
-      <div className='border-dashed border border-zinc-500 w-full h-64 rounded-lg'></div>
-      <div className='border-dashed border border-zinc-500 w-full h-64 rounded-lg'></div>
-      <div className='border-dashed border border-zinc-500 w-full h-64 rounded-lg'></div>
-      <div className='border-dashed border border-zinc-500 w-full h-64 rounded-lg'></div>
-    </>
+    <div className='flex flex-wrap gap-4 justify-evenly'>
+      <div className='border-dashed border border-zinc-500 w-64 h-64 rounded-lg'></div>
+      <div className='border-dashed border border-zinc-500 w-64 h-64 rounded-lg'></div>
+      <div className='border-dashed border border-zinc-500 w-64 h-64 rounded-lg'></div>
+      <div className='border-dashed border border-zinc-500 w-64 h-64 rounded-lg'></div>
+      <div className='border-dashed border border-zinc-500 w-64 h-64 rounded-lg'></div>
+      <div className='border-dashed border border-zinc-500 w-64 h-64 rounded-lg'></div>
+    </div>
   )
 }
 

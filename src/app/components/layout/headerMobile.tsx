@@ -48,7 +48,10 @@ const HeaderMobile = () => {
       className={`fixed inset-0 z-50 w-full md:hidden ${isOpen ? '' : 'pointer-events-none'}`}
       ref={containerRef}
     >
-      <motion.div className='absolute inset-0 right-0 w-full bg-white' variants={sidebar} />
+      <motion.div
+        className='absolute inset-0 right-0 w-full backdrop-blur-2xl'
+        variants={sidebar}
+      />
       <motion.ul
         variants={variants}
         className='absolute grid w-full gap-3 px-10 py-16 max-h-screen overflow-y-auto'
