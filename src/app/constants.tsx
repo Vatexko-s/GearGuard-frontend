@@ -1,22 +1,22 @@
 import { SideNavItem } from './data/models'
-import { Cog8ToothIcon, HomeIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/solid'
+import { Icon } from '@iconify/react'
 
 export const SIDENAV_ITEMS: SideNavItem[] = [
   {
     title: 'Home',
     path: '/',
-    icon: <HomeIcon />,
+    icon: <Icon icon='lucide:home' width='24' height='24' />,
   },
   {
     title: 'Settings',
     path: '/settings',
-    icon: <Cog8ToothIcon />,
+    icon: <Icon icon='lucide:cog' width='24' height='24' />,
     submenu: true,
     subMenuItems: [{ title: 'Account', path: '/settings/account' }],
   },
   {
     title: 'Help',
     path: '/help',
-    icon: <QuestionMarkCircleIcon />,
+    icon: <Icon icon='lucide:circle-help' width='24' height='24' />,
   },
 ]
