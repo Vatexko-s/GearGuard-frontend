@@ -1,22 +1,26 @@
-import React from 'react';
-import Image, {StaticImageData} from "next/image";
+import React from 'react'
+import Image, { StaticImageData } from 'next/image'
 
 interface CategoryCardProps {
-    CategoryName: string;
-    ImageSrc: string | StaticImageData;
+  CategoryName: string
+  ImageSrc: string | StaticImageData
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({ CategoryName, ImageSrc }) => {
   return (
-    <div className='flex flex-col justify-start items-center gap-4 w-64 h-64 border-dashed border border-zinc-500 rounded-lg'>
-      <Image
-        src={ImageSrc}
-        alt='Image'
-        className='m-0 rounded-lg w-full h-48 object-cover'
-        width={0}
-        height={0}
-      />
-      <p className='text-center'>{CategoryName}</p>
+    <div className='w-64 h-64 bg-white rounded-lg shadow-lg dark:bg-gray-800 flex flex-col items-center'>
+      <div className='w-full h-full overflow-hidden flex justify-center'>
+        <Image
+          className='object-cover'
+          src={ImageSrc}
+          alt={CategoryName}
+          width={200} // Adjusted width
+          height={128} // Adjusted height
+        />
+      </div>
+      <div className='text-center mt-2 mb-4'>
+        <span className='text-lg font-bold text-gray-700 dark:text-gray-200'>{CategoryName}</span>
+      </div>
     </div>
   )
 }

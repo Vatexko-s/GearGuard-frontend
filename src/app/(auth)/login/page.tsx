@@ -1,14 +1,12 @@
 'use client'
 
-import React, {useState} from 'react'
-import AnimatedLogo from '@/app/components/AnimatedLogo'
-import LoginSampleData from '../../samples/loginsamples.json'
-import {useRouter} from "next/navigation";
+import React, { useState } from 'react'
+import AnimatedLogo from '@/app/components/animatedLogo'
+import LoginSampleData from '../../../../public/samples/loginsamples.json'
+import { useRouter } from 'next/navigation'
 
 const authentication = (email: string, password: string) => {
-  return LoginSampleData.some(
-      (user) => user.email === email && user.password === password
-  )
+  return LoginSampleData.some(user => user.email === email && user.password === password)
 }
 
 const LoginPage = () => {
@@ -19,12 +17,11 @@ const LoginPage = () => {
 
   const LoginFunctionality = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    if(authentication(email, password)) {
-      setError("")
-      router.push("/dashboard")
-    }
-    else{
-      setError("failed to sign in")
+    if (authentication(email, password)) {
+      setError('')
+      router.push('/dashboard')
+    } else {
+      setError('failed to sign in')
       alert(error)
     }
   }
@@ -48,7 +45,7 @@ const LoginPage = () => {
               placeholder='Email Address'
               aria-label='Email Address'
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
             />
           </div>
 
@@ -59,7 +56,7 @@ const LoginPage = () => {
               placeholder='Password'
               aria-label='Password'
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
             />
           </div>
 
@@ -68,7 +65,10 @@ const LoginPage = () => {
               Forget Password?
             </a>
 
-            <button onClick={LoginFunctionality} className='px-6 py-2 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50'>
+            <button
+              onClick={LoginFunctionality}
+              className='px-6 py-2 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50'
+            >
               Sign In
             </button>
           </div>

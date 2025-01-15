@@ -1,29 +1,60 @@
-import React from 'react';
-import CategoryCard from "@/app/components/categoryCard";
-import Microphone from '../components/microphone.png';
-import Speaker from '../components/speaker.png';
-import Link from "next/link";
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import CategoryCard from '@/app/components/categoryCard'
+import Link from 'next/link'
+import { ICategory } from '@/app/data/models'
+import { AlertCircle } from 'react-feather'
+import { useToast } from '@/app/contexts/ToastService'
 
 const Dashboard = () => {
-    const categories = [
-        { name: 'Microphones', image: Microphone },
-        { name: 'Speakers', image: Speaker },
-        { name: 'Cables', image: Microphone },
-        { name: 'Others', image: Microphone },
-    ];
+  const [categories, setCategories] = useState<ICategory[]>([])
+  const toast = useToast()
 
-    return (
-        <div className='flex flex-wrap gap-4 justify-evenly'>
-            {categories.map((category) => (
-                <Link
-                    key={category.name}
-                    href={`/dashboard/${category.name.toLowerCase()}`}
-                >
-                    <CategoryCard CategoryName={category.name} ImageSrc={category.image} />
-                </Link>
-            ))}
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/samples/categoriesSample.json')
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const data: ICategory[] = await response.json()
+        setCategories(data)
+      } catch (err) {
+        if (err instanceof Error) {
+          handleError(err.message)
+        } else {
+          handleError('An unknown error occurred')
+        }
+      }
+    }
+
+    fetchCategories()
+  }, [])
+
+  const handleError = (message: string) => {
+    if (toast) {
+      toast.open(
+        <div className='flex gap-2 bg-red-400 p-4 rounded-lg shadow-lg'>
+          <AlertCircle size={40} />
+          <div>
+            <h3 className='font-bold'>Action Failed</h3>
+            <p className='text-sm'>{message}</p>
+          </div>
         </div>
-    );
-};
+      )
+    }
+  }
 
-export default Dashboard;
+  return (
+    <div className='flex flex-wrap gap-4 justify-evenly'>
+      {categories.map(category => (
+        <Link key={category.name} href={`/dashboard/${category.name.toLowerCase()}`}>
+          <CategoryCard CategoryName={category.name} ImageSrc={category.image} />
+        </Link>
+      ))}
+    </div>
+  )
+}
+
+export default Dashboard
