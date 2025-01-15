@@ -63,21 +63,15 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 - **Actors:** Používateľ _(požičateľ)_
 - **Description:** Používateľ si môže požičať položky s rezerváciou, ktorú si vytvoril v čase ktorý zadal.
 - **Preconditions:** Používateľ je prihlásený, položka je `available`, `Reservation` je vytvorená.
-- **Postconditions:** Položky sú označené ako `lent`, rezervácia je archivovaná, je vytvorené `Loan`.
-
-### požičanie položky na mieste (fast loan)
-- **Actors:** Používateľ _(požičateľ)_
-- **Description:** Používateľ si môže požičať položku na mieste, bez rezervácie ak je položka dostupná, použivateľ zadá aj dátum do kedy si položky požičiava, lebo môže byť vytvorená `Reservation`.
-- **Preconditions:** Používateľ je prihlásený, položka je `available`.
-- **Postconditions:** Položky sú označené ako `lent`, je vytvorené `Loan` .
+- **Postconditions:** Položky sú označené ako `not available`, rezervácia je archivovaná, je vytvorené `Rental`.
 
 ---
 
 ### vrátenie požičanej položky
 - **Actors:** Používateľ _(požičateľ)_
 - **Description:** Používateľ vráti požičané položky (očakávanie že sa vráti aj fyzicky).
-- **Preconditions:** Používateľ je prihlásený, položka je `lent`.
-- **Postconditions:** Položky sú označené ako `available`, je vytvorené `Return`.
+- **Preconditions:** Používateľ je prihlásený, položka je `not available`.
+- **Postconditions:** Položky sú označené ako `available`, je vytvorené `History`.
 
 > [!NOTE]
 > Ak používateľ položky nevráti včas, administrátor to bude vidieť v dashboarde a v tejto fáze bude na ňom ako sa zachvá. (iplementovať notifikácie v budúcnosti)
@@ -147,8 +141,7 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 - **Účel:** Umožniť používateľom navigovať medzi hlavnými časťami aplikácie.
 - **Obsah:**
   - Reservations
-  - Loans
-  - Fast Loans
+  - History of Rentals
   - Home
 - nachádza sa vždy na dolnej časti aplikácie (mobil)
 
@@ -178,7 +171,7 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 - **Obsah:**
   - Názov položky.
   - Stav položky. - forma odtieňa farby položky
-  - detaily položky. - forma tlačidla
+  - detaily položky.
 - **API Endpoints:**
   - doplniť pri implementácii backendu
 
@@ -194,28 +187,7 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 
 ---
 
-### 5. **Loans**
-- **Účel:** Zobraziť aktuálne požičané položky a históriu požičaných a možnosť `copy to reservation` - do rezervácie sa pridajú položky ktoré už si raz používateľ požičal, možnosť vrátenia položiek.
-- **Obsah:**
-  - Zoznam požičaných položiek.
-  - Zoznam historických požičaní.
-  - Možnosť vrátenia položiek.
-- **API Endpoints:**
-  - doplniť pri implementácii backendu
-
----
-
-### 6. **Fast Loans**
-- **Účel:** Umožniť používateľom požičať si položky na mieste bez rezervácie.
-- **Obsah:**
-  - Zoznam položiek.
-  - Formulár na požičanie položiek.
-- **API Endpoints:**
-  - doplniť pri implementácii backendu
-
----
-
-### 7. **Sekcia Pre Administrátora**
+### 5. **Sekcia Pre Administrátora**
 - **Účel:** Poskytnúť administrátorom nástroje na správu inventára a používateľov.
 - **Obsah:**
   - Formulár na pridávanie nových položiek.
@@ -230,7 +202,6 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 
 ### Frontend
 - **Framework:** React + Next.js
-- **Deployment:** Vercel
 - **Docker:** Áno, cez `Dockerfile` a `docker-compose.yml`
 
 ### Backend
