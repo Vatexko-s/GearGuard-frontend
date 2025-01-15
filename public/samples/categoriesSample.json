@@ -1,0 +1,6 @@
+[
+  { "name": "Microphones", "image": "/microphone.png" },
+  { "name": "Speakers", "image": "/speaker.png" },
+  { "name": "Cables", "image": "/cables.png" },
+  { "name": "Others", "image": "/others.png" }
+]

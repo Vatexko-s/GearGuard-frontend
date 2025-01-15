@@ -7,3 +7,8 @@ export type SideNavItem = {
   submenu?: boolean
   subMenuItems?: SideNavItem[]
 }
+
+export type ICategory = {
+  name: string
+  image: string
+}
