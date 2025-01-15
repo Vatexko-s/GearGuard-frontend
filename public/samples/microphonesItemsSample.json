@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Microphone A",
+    "image": "/images/microphoneA.jpg",
+    "availableItems": 10,
+    "availability": true
+  },
+  {
+    "name": "Microphone B",
+    "image": "/images/microphoneB.jpg",
+    "availableItems": 5,
+    "availability": true
+  },
+  {
+    "name": "Microphone C",
+    "image": "/images/microphoneC.jpg",
+    "availableItems": 0,
+    "availability": false
+  },
+  {
+    "name": "Microphone D",
+    "image": "/images/microphoneD.jpg",
+    "availableItems": 3,
+    "availability": true
+  },
+  {
+    "name": "Microphone E",
+    "image": "/images/microphoneE.jpg",
+    "availableItems": 1,
+    "availability": true
+  },
+  {
+    "name": "Microphone F",
+    "image": "/images/microphoneF.jpg",
+    "availableItems": 0,
+    "availability": false
+  },
+  {
+    "name": "Microphone G",
+    "image": "/images/microphoneG.jpg",
+    "availableItems": 2,
+    "availability": true
+  },
+  {
+    "name": "Microphone H",
+    "image": "/images/microphoneH.jpg",
+    "availableItems": 0,
+    "availability": false
+  },
+  {
+    "name": "Microphone I",
+    "image": "/images/microphoneI.jpg",
+    "availableItems": 0,
+    "availability": false
+  },
+  {
+    "name": "Microphone J",
+    "image": "/images/microphoneJ.jpg",
+    "availableItems": 4,
+    "availability": true
+  },
+  {
+    "name": "Microphone K",
+    "image": "/images/microphoneK.jpg",
+    "availableItems": 6,
+    "availability": true
+  },
+  {
+    "name": "Microphone L",
+    "image": "/images/microphoneL.jpg",
+    "availableItems": 7,
+    "availability": true
+  }
+]
