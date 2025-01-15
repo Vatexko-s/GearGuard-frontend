@@ -18,5 +18,9 @@
   {
     "email": "user5@gmail.com",
     "password": "123456789"
-  }
+  },
+    {
+        "email": "1",
+      "password": "1"
+    }
 ]

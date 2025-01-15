@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Bluetooth Speaker",
+    "image": "/images/bluetooth_speaker.jpg",
+    "availableItems": 12,
+    "availability": true
+  },
+  {
+    "name": "Portable Speaker",
+    "image": "/images/portable_speaker.jpg",
+    "availableItems": 7,
+    "availability": true
+  },
+  {
+    "name": "Smart Speaker",
+    "image": "/images/smart_speaker.jpg",
+    "availableItems": 5,
+    "availability": false
+  },
+  {
+    "name": "Wireless Speaker",
+    "image": "/images/wireless_speaker.jpg",
+    "availableItems": 10,
+    "availability": true
+  }
+]

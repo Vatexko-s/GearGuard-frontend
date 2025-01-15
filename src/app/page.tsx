@@ -12,7 +12,7 @@ export default function Home() {
   const handleError = () => {
     if (toast) {
       toast.open(
-        <div className='flex gap-2 bg-blue-300 p-4 rounded-lg shadow-lg'>
+        <div className='flex gap-2 bg-red-300 p-4 rounded-lg shadow-lg'>
           <AlertCircle size={40} />
           <div>
             <h3 className='font-bold'>Action Failed</h3>

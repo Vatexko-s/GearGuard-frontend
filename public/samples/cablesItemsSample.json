@@ -1,0 +1,26 @@
+[
+  {
+    "name": "HDMI Cable",
+    "image": "/images/hdmi_cable.jpg",
+    "availableItems": 15,
+    "availability": true
+  },
+  {
+    "name": "USB-C Cable",
+    "image": "/images/usb_c_cable.jpg",
+    "availableItems": 8,
+    "availability": true
+  },
+  {
+    "name": "Ethernet Cable",
+    "image": "/images/ethernet_cable.jpg",
+    "availableItems": 20,
+    "availability": true
+  },
+  {
+    "name": "VGA Cable",
+    "image": "/images/vga_cable.jpg",
+    "availableItems": 5,
+    "availability": false
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Item 1",
+    "image": "/images/item1.jpg",
+    "availableItems": 10,
+    "availability": true
+  },
+  {
+    "name": "Item 2",
+    "image": "/images/item2.jpg",
+    "availableItems": 5,
+    "availability": false
+  },
+  {
+    "name": "Item 3",
+    "image": "/images/item3.jpg",
+    "availableItems": 8,
+    "availability": true
+  }
+]
