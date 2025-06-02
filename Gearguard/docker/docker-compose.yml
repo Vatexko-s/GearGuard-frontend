@@ -1,0 +1,65 @@
+name: ssnd-web-programovanie
+
+services:
+  ssnd-db:
+    image: postgres:17
+    container_name: ssnd-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../data/postgresql:/var/lib/postgresql/data
+    networks:
+        ssnd:
+          ipv4_address: 172.18.0.4
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8088:80"
+    volumes:
+      - ../data/pgadmin:/var/lib/pgadmin
+    networks:
+        ssnd:
+          ipv4_address: 172.18.0.5
+    depends_on:
+      - ssnd-db
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: php-development:8.3
+    container_name: php-backend
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    env_file:
+      - .env
+    volumes:
+      - ../backend:/var/www/
+    networks:
+      ssnd:
+        ipv4_address: 172.18.0.3
+
+  frontend:
+      build:
+        context: ../frontend
+        dockerfile: Dockerfile.frontend
+      container_name: next-frontend
+      restart: unless-stopped
+      ports:
+        - "3000:3000"
+      volumes:
+        - ../frontend:/app
+      networks:
+        ssnd:
+          ipv4_address: 172.18.0.2
+
+networks:
+    ssnd:
+      external: true
