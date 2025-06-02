@@ -183,7 +183,7 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
   - Zoznam rezervácií.
   - Formulár na vytvorenie novej rezervácie.
 - **API Endpoints:**
-  - doplniť pri implementácii backendu
+
 
 ---
 
