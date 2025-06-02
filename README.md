@@ -55,7 +55,7 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 
 > [!CAUTION]
 >  - Kontrola rezervácie:
->   - Používateľ môže zmeniť dátum a čas požičiavania kedykoľvek pred začiatkom požičiavania, ale treba kontrolovať či budú položky dostupné v danom "zmenenom" čase.
+     >   - Používateľ môže zmeniť dátum a čas požičiavania kedykoľvek pred začiatkom požičiavania, ale treba kontrolovať či budú položky dostupné v danom "zmenenom" čase.
 >   - Všeobecne kontrola či je položka `available` v čase ktorý používateľ zadal.
 
 
@@ -90,7 +90,7 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 - **Scenarios:**
   - **Vytvorenie**, **Zmena**, **Zmazanie** prístupu pre používateľa
   - **Zobrazenie** zoznamu používateľov
-  - Generátor hesiel pre nových používateľov. 
+  - Generátor hesiel pre nových používateľov.
 - **main flow -** _aktualizácia_**:**
   - Administrátor sa prihlási a zobrazí dashboard.
   - Administrátor vyhľadá používateľa a aktualizuje jeho údaje.
@@ -108,7 +108,7 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
   - Administrátor vytvorí nového používateľa.
   - Aplikácia vygeneruje heslo používateľovi.
   - Aplikácia uloží nového používateľa do databázy.
-   
+
 ### správa inventára
 - **Actors:** Administrátor
 - **Description:** Administrátor môže pridávať, aktualizovať a odstraňovať položky z inventára.
@@ -183,7 +183,7 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
   - Zoznam rezervácií.
   - Formulár na vytvorenie novej rezervácie.
 - **API Endpoints:**
-    - doplniť pri implementácii backendu
+
 
 ---
 
