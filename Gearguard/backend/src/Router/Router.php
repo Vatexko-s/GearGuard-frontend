@@ -115,16 +115,19 @@ class Router
     {
         $parameterNames = [];
         // Replace dynamic segments with named capture groups.
-        $regex = preg_replace_callback('/\{(\w+):(int|uuid)\}/', function ($matches) use (&$parameterNames) {
+        $regex = preg_replace_callback('/\{(\w+):(int|uuid|string)\}/', function ($matches) use (&$parameterNames) {
             $parameterNames[] = $matches[1];
             if ($matches[2] === 'int') {
                 return '(?P<' . $matches[1] . '>\d+)';
             } elseif ($matches[2] === 'uuid') {
-                return '(?P<' . $matches[1] . '>[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})';
+                // Allow any string to match, validation happens in the controller
+                return '(?P<' . $matches[1] . '>[^/]+)';
+            } elseif ($matches[2] === 'string') {
+                return '(?P<' . $matches[1] . '>[^/]+)';
             }
-            throw new InvalidArgumentException('Only int and uuid parameter types are supported.');
+            return '(?P<' . $matches[1] . '>[^/]+)'; // Default to generic strings
         }, $path);
-        
+
         // Ensure the regex matches the entire path.
         $regex = "#^" . $regex . "$#";
         return [$regex, $parameterNames];
@@ -147,6 +150,7 @@ class Router
         foreach ($routes as $route) {
             if (preg_match($route['regex'], $path, $matches)) {
                 // Extract only the named parameters in the defined order.
+                error_log("Matched route: " . $route['raw_path']);
                 $params = [];
                 foreach ($route['parameters'] as $name) {
                     if (isset($matches[$name])) {

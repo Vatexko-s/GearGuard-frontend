@@ -5,6 +5,7 @@ require __DIR__ . '/../vendor/autoload.php';
 use pwa\Controller\AuthController;
 use pwa\Router\Router;
 use pwa\Controller\PersonController;
+use pwa\Controller\ItemController;
 
 //echo "Hello, world from L17!";
 
@@ -25,5 +26,13 @@ $router->get('/persons', PersonController::class, 'read');
 $router->post('/persons', PersonController::class, 'create');
 $router->delete('/persons/{personId:uuid}', PersonController::class, 'delete');
 
+$router->post('/api/v1/items', ItemController::class, 'create');
+$router->get('/api/v1/items/category', ItemController::class, 'getAllCategories');
+$router->get('/api/v1/items/category/{categoryName}', ItemController::class, 'getByCategory'); //TODO: blbost nefunguje
+$router->get('/api/v1/items/{id:uuid}', ItemController::class, 'getById');
+$router->put('/api/v1/items/{id:uuid}', ItemController::class, 'update');
+$router->delete('/api/v1/items/{id:uuid}', ItemController::class, 'delete');
+
 // 3. zavoláme metódu dispatch na routri
 $router->dispatch();
+
