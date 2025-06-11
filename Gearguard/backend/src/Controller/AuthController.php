@@ -44,29 +44,32 @@ class AuthController
      */
     public function login(): void
     {
-        // test this request comes from authorized client application
-        if(!$this->validateClientApplication()) {;
+        if (!$this->validateClientApplication()) {
             return;
         }
-        
+
         // Get the request body
         $body = file_get_contents('php://input');
         $bodyData = json_decode($body, true);
-        
+
         // Check if the request body contains the required fields
         if (!isset($bodyData['username']) || !isset($bodyData['password'])) {
             $this->view->render(['error' => 'Invalid request'], 400);
             return;
         }
-        
+
         try {
             $token = $this->authService->login($bodyData['username'], $bodyData['password']);
         } catch (\Exception $e) {
             $this->view->render(['error' => 'Invalid credentials'], 401);
             return;
         }
-        
-        $this->view->render(['token' => $token]);
+
+        // Send both token and username in the response
+        $this->view->render([
+            'token' => $token,
+            'username' => $bodyData['username']
+        ]);
     }
     
     /**

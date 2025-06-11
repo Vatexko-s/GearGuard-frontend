@@ -219,3 +219,49 @@ Táto aplikácia umožňuje používateľom prezerať inventár, požičiavať s
 - Pokročilé štatistiky využitia inventára.
 - Grafické zobrazenie inventára (regálov).
 - Integrácia s QR kódmi (voliteľné).
+
+
+## ENDPOINTS
+### Items Endpoints
+- **GET /api/v1/items/{id}** - Získať položku podľa ID
+- **GET /api/v1/items/category/{categoryName}** - Získať všetky položky podľa kategórie
+- **GET /api/v1/items/categories** - Získať všetky kategórie položiek 
+- **POST /api/v1/items** - Pridať novú položku
+- **PUT /api/v1/items/{id}** - Aktualizovať položku podľa ID
+- **DELETE /api/v1/items/{id}** - Odstrániť položku podľa ID
+- json struktúra Itemu:
+```json
+{
+  "id": "integer",
+  "name": "string",
+  "description": "string",
+  "category": "string",
+  "status": "available | reserved | not available",
+  "updated_at": "timestamp"
+}
+```
+### Reservations Endpoints
+- **GET /api/v1/reservations/{id}** - Získať rezerváciu podľa ID
+- **GET /api/v1/reservations** - Získať všetky rezervácie užívateľa - v tele bude ID používateľa
+- **POST /api/v1/reservations** - Vytvoriť novú rezerváciu - v tele bude ID používateľa a položky, ktoré si chce požičať id používateľa a položky, ktoré si chce požičať
+- **PUT /api/v1/reservations/{id}** - Aktualizovať rezerváciu podľa ID
+- **POST /api/v1/reservations/{id}/items** - Pridať položku do existujúcej rezervácie - v body bdue ID položky
+- **DELETE /api/v1/reservations/{id}** - Odstrániť rezerváciu podľa ID
+- **DELETE /api/v1/reservations/{id}/items/{itemId}** - Odstrániť položku z rezervácie
+- json struktúra rezervácie:
+```json
+{
+  "id": "integer",
+  "user_id": "integer",
+  "items": [
+    {
+      "id": "integer"
+    }
+  ],
+  "start_date": "timestamp",
+  "end_date": "timestamp",
+  "status": "reserved | rented | returned"
+}
+```
+
+

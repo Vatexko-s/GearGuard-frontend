@@ -19,7 +19,7 @@ class JsonView
         // Set the Content-Type header to application/json.
         header('Content-Type: application/json');
 
-        header("Access-Control-Allow-Origin: http://127.0.0.1:8080"); // Replace with your frontend's origin
+        header("Access-Control-Allow-Origin: http://localhost:3000"); // Replace with your frontend's origin
         header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
         header("Access-Control-Allow-Headers: Content-Type, Authorization");
         header("Access-Control-Allow-Credentials: true");

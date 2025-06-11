@@ -54,12 +54,12 @@ class ItemController
             $errors[] = 'Category is required and must be a string.';
         }
 
-        if (empty($data['status']) || !in_array($data['status'], ['active', 'inactive'], true)) {
-            $errors[] = 'Status is required and must be either "active" or "inactive".';
+        if (empty($data['status']) || !in_array($data['status'], ['Available', 'Not available'], true)) {
+            $errors[] = 'Status is required and must be either "Available" or "Not available".';
         }
 
-        if (isset($data['updated_at']) && !is_int($data['updated_at'])) {  // zatial dobrovolne - preto to pada ked to tam nie je (staci to spravit povinne a fixed) a je to integer nie datum
-            $errors[] = 'Updated_at must be an integer.';
+        if (isset($data['updated_at']) && !strtotime($data['updated_at'])) {
+            $errors[] = 'Updated_at must be a valid timestamp.';
         }
 
         return $errors;
@@ -74,6 +74,11 @@ class ItemController
 
         $itemModel = new ItemModel();
         $items = $itemModel->getByCategory($category);
+
+        if (empty($items)) {
+            $this->view->render(['error' => 'No items found for the given category'], 404);
+            return;
+        }
 
         $this->view->render($items);
     }
