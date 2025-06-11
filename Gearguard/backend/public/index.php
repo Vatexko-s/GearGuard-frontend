@@ -16,6 +16,7 @@ use pwa\Controller\AuthController;
 use pwa\Router\Router;
 use pwa\Controller\PersonController;
 use pwa\Controller\ItemController;
+use pwa\Controller\ReservationController;
 
 //echo "Hello, world from L17!";
 
@@ -39,10 +40,19 @@ $router->delete('/persons/{personId:uuid}', PersonController::class, 'delete');
 // Item endpoints
 $router->post('/api/v1/items', ItemController::class, 'create');
 $router->get('/api/v1/items/category', ItemController::class, 'getAllCategories');
-$router->get('/api/v1/items/category/{categoryName:string}', ItemController::class, 'getByCategory'); //TODO: blbost nefunguje
+$router->get('/api/v1/items/category/{categoryName:string}', ItemController::class, 'getByCategory');
 $router->get('/api/v1/items/{id:uuid}', ItemController::class, 'getById');
 $router->put('/api/v1/items/{id:uuid}', ItemController::class, 'update');
 $router->delete('/api/v1/items/{id:uuid}', ItemController::class, 'delete');
+
+$router->get('/api/v1/reservations', ReservationController::class, 'getByUserId');
+$router->post('/api/v1/reservations', ReservationController::class, 'create');
+$router->get('/api/v1/reservations/history', ReservationController::class, 'getHistory');
+$router->get('/api/v1/reservations/{id:uuid}', ReservationController::class, 'getById');
+$router->put('/api/v1/reservations/{id:uuid}', ReservationController::class, 'update');
+$router->delete('/api/v1/reservations/{id:uuid}', ReservationController::class, 'delete');
+$router->post('/api/v1/reservations/{reservationID:uuid}/items', ReservationController::class, 'addItemToReservation');
+$router->delete('/api/v1/reservations/{reservationID:uuid}/items/{itemID:uuid}', ReservationController::class, 'deleteItemFromReservation');
 
 // 3. zavoláme metódu dispatch na routri
 $router->dispatch();
