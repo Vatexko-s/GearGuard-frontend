@@ -20,7 +20,7 @@ class JsonView
         header('Content-Type: application/json');
 
         header("Access-Control-Allow-Origin: http://localhost:3000"); // Replace with your frontend's origin
-        header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+        header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
         header("Access-Control-Allow-Headers: Content-Type, Authorization");
         header("Access-Control-Allow-Credentials: true");
 

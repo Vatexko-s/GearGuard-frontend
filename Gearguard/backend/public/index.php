@@ -1,7 +1,7 @@
 <?php
 // Allow CORS for localhost:3000
 header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 // Handle preflight requests
@@ -53,6 +53,7 @@ $router->put('/api/v1/reservations/{id:uuid}', ReservationController::class, 'up
 $router->delete('/api/v1/reservations/{id:uuid}', ReservationController::class, 'delete');
 $router->post('/api/v1/reservations/{reservationID:uuid}/items', ReservationController::class, 'addItemToReservation');
 $router->delete('/api/v1/reservations/{reservationID:uuid}/items/{itemID:uuid}', ReservationController::class, 'deleteItemFromReservation');
+$router->post('/api/v1/reservations/{id:uuid}/rent', ReservationController::class, 'rent');
 
 // 3. zavoláme metódu dispatch na routri
 $router->dispatch();

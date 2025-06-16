@@ -105,63 +105,15 @@ class ReservationModel
         }
     }
 
-    public function update(UuidInterface $id, array $data): bool
+    public function updateStatus(UuidInterface $id, string $status): bool
     {
-        $this->pdo->beginTransaction();
+        $stmt = $this->pdo->prepare("UPDATE reservations SET status = :status WHERE id = :id");
+        $stmt->execute([
+            ':id' => $id->toString(),
+            ':status' => $status,
+        ]);
 
-        try {
-            // Update the reservations table
-            $sql = "UPDATE reservations SET start_date = :start_date, end_date = :end_date, status = :status WHERE id = :id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([
-                ':id' => $id->toString(),
-                ':start_date' => $data['start_date'] ?? null,
-                ':end_date' => $data['end_date'] ?? null,
-                ':status' => $data['status'] ?? null,
-            ]);
-
-            // Update the reservation_items table
-            if (!empty($data['items']) && is_array($data['items'])) {
-                // Extract item IDs from the items array
-                $itemIds = array_map(fn($item) => $item['id'], $data['items']);
-
-                // Get existing item IDs for the reservation
-                $existingItemIds = $this->getItemsByReservationId($id);
-
-                // Find new items to add
-                $itemsToAdd = array_diff($itemIds, $existingItemIds);
-
-                // Find items to remove
-                $itemsToRemove = array_diff($existingItemIds, $itemIds);
-
-                // Add new items
-                $addStmt = $this->pdo->prepare(
-                    "INSERT INTO reservation_items (reservation_id, item_id) VALUES (:reservation_id, :item_id)"
-                );
-                foreach ($itemsToAdd as $itemId) {
-                    $addStmt->execute([
-                        ':reservation_id' => $id->toString(),
-                        ':item_id' => $itemId,
-                    ]);
-                }
-
-                $removeStmt = $this->pdo->prepare(
-                    "DELETE FROM reservation_items WHERE reservation_id = :reservation_id AND item_id = :item_id"
-                );
-                foreach ($itemsToRemove as $itemId) {
-                    $removeStmt->execute([
-                        ':reservation_id' => $id->toString(),
-                        ':item_id' => $itemId,
-                    ]);
-                }
-            }
-
-            $this->pdo->commit();
-            return true;
-        } catch (\Exception $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        }
+        return $stmt->rowCount() > 0;
     }
 
     public function delete(UuidInterface $id): bool

@@ -54,7 +54,7 @@ class ItemController
             $errors[] = 'Category is required and must be a string.';
         }
 
-        if (empty($data['status']) || !in_array($data['status'], ['Available', 'Not available'], true)) {
+        if (empty($data['status']) || !in_array($data['status'], ['Available', 'Not available', 'reserved'], true)) {
             $errors[] = 'Status is required and must be either "Available" or "Not available".';
         }
 
@@ -120,12 +120,6 @@ class ItemController
             return;
         }
 
-        $errors = $this->validateItemData($body);
-        if (!empty($errors)) {
-            $this->view->render(['errors' => $errors], 400);
-            return;
-        }
-
         $itemModel = new ItemModel();
         $uuid = Uuid::fromString($id);
         $existingItem = $itemModel->getById($uuid);
@@ -135,7 +129,16 @@ class ItemController
             return;
         }
 
-        if ($itemModel->update($uuid, $body)) {
+        // Merge existing item data with the new data
+        $updatedData = array_merge($existingItem->jsonSerialize(), $body);
+
+        $errors = $this->validateItemData($updatedData);
+        if (!empty($errors)) {
+            $this->view->render(['errors' => $errors], 400);
+            return;
+        }
+
+        if ($itemModel->update($uuid, $updatedData)) {
             $this->view->render(['message' => 'Item updated']);
         } else {
             $this->view->render(['error' => 'Failed to update item'], 500);

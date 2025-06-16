@@ -92,42 +92,19 @@ class ReservationController
             return;
         }
 
-        // Validate user_id
-        if (empty($body['user_id']) || !$this->validateUuid($body['user_id'])) {
-            $this->view->render(['error' => 'Invalid or missing user_id'], 400);
+        // Get user_id from token
+        $userId = $this->getUserIdFromToken();
+
+        if (!$userId || !$this->validateUuid($userId)) {
+            $this->view->render(['error' => 'Invalid or missing user ID in token'], 400);
             return;
         }
 
         $stmt = $this->getPdo()->prepare("SELECT COUNT(*) FROM users WHERE id = :id");
-        $stmt->execute([':id' => $body['user_id']]);
+        $stmt->execute([':id' => $userId]);
         if ($stmt->fetchColumn() == 0) {
             $this->view->render(['error' => 'User does not exist'], 404);
             return;
-        }
-
-        // Validate item IDs
-        if (empty($body['items']) || !is_array($body['items'])) {
-            $this->view->render(['error' => 'Items are required and must be an array'], 400);
-            return;
-        }
-
-        $itemIds = array_map(fn($item) => $item['id'], $body['items']);
-        $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
-        $stmt = $this->getPdo()->prepare("SELECT COUNT(*) FROM items WHERE id IN ($placeholders)");
-        $stmt->execute($itemIds);
-
-        if ($stmt->fetchColumn() != count($itemIds)) {
-            $this->view->render(['error' => 'One or more item IDs do not exist'], 400);
-            return;
-        }
-
-        // Check if any item is already in another reservation
-        $reservationModel = new ReservationModel();
-        foreach ($itemIds as $itemId) {
-            if ($reservationModel->isItemInAnotherReservation($itemId, null)) {
-                $this->view->render(['error' => "Item $itemId is already in another reservation"], 400);
-                return;
-            }
         }
 
         // Validate start_date and end_date
@@ -150,11 +127,20 @@ class ReservationController
         }
 
         // Validate status
-        if (!empty($body['status']) && !in_array($body['status'], ['returned', 'rented', 'reserved'], true)) {
+        if (empty($body['status'])) {
+            $body['status'] = 'reserved';
+        } elseif (!in_array($body['status'], ['returned', 'rented', 'reserved'], true)) {
             $this->view->render(['error' => 'Invalid status. Allowed values are returned, rented, or reserved.'], 400);
             return;
         }
 
+        // Add user_id to the request body
+        $body['user_id'] = $userId;
+
+        // Ensure items are optional
+        $body['items'] = $body['items'] ?? [];
+
+        $reservationModel = new ReservationModel();
         $reservation = $reservationModel->create($body);
 
         $this->view->render($reservation, 201);
@@ -258,20 +244,44 @@ class ReservationController
 
     public function delete(string $id): void
     {
+        // Validate the UUID format of the reservation ID
         if (!$this->validateUuid($id)) {
             $this->view->render(['error' => 'Invalid UUID'], 400);
+            return;
+        }
+
+        // Get user ID from the token
+        $userId = $this->getUserIdFromToken();
+        if (!$userId || !$this->validateUuid($userId)) {
+            $this->view->render(['error' => 'Invalid or missing user ID in token'], 400);
             return;
         }
 
         $reservationModel = new ReservationModel();
         $uuid = Uuid::fromString($id);
 
+        // Check if the reservation exists
         $reservation = $reservationModel->getById($uuid);
         if (!$reservation) {
             $this->view->render(['error' => 'Reservation not found'], 404);
             return;
         }
 
+        // Ensure the user is authorized to delete the reservation
+        if ($reservation->getUserId()->toString() !== $userId) {
+            $this->view->render(['error' => 'Unauthorized to delete this reservation'], 403);
+            return;
+        }
+
+        // Update the status of all items in the reservation to "Available"
+        $items = $reservation->getItems();
+        if (!empty($items)) {
+            $placeholders = implode(',', array_fill(0, count($items), '?'));
+            $stmt = $this->getPdo()->prepare("UPDATE items SET status = 'Available' WHERE id IN ($placeholders)");
+            $stmt->execute($items);
+        }
+
+        // Proceed with deletion
         if ($reservationModel->delete($uuid)) {
             $this->view->render([], 204);
         } else {
@@ -387,5 +397,53 @@ class ReservationController
         }
 
         return $errors;
+    }
+
+    public function rent(string $id): void
+    {
+        // Validate the UUID format of the reservation ID
+        if (!$this->validateUuid($id)) {
+            $this->view->render(['error' => 'Invalid UUID'], 400);
+            return;
+        }
+
+        // Get user ID from the token
+        $userId = $this->getUserIdFromToken();
+        if (!$userId || !$this->validateUuid($userId)) {
+            $this->view->render(['error' => 'Invalid or missing user ID in token'], 400);
+            return;
+        }
+
+        $reservationModel = new ReservationModel();
+        $uuid = Uuid::fromString($id);
+
+        // Check if the reservation exists
+        $reservation = $reservationModel->getById($uuid);
+        if (!$reservation) {
+            $this->view->render(['error' => 'Reservation not found'], 404);
+            return;
+        }
+
+        // Ensure the user is authorized to rent the reservation
+        if ($reservation->getUserId()->toString() !== $userId) {
+            $this->view->render(['error' => 'Unauthorized to rent this reservation'], 403);
+            return;
+        }
+
+        // Update the reservation status to "rented"
+        if (!$reservationModel->updateStatus($uuid, 'rented')) {
+            $this->view->render(['error' => 'Failed to update reservation status'], 500);
+            return;
+        }
+
+        // Update the status of all items in the reservation to "Not available"
+        $items = $reservation->getItems();
+        if (!empty($items)) {
+            $placeholders = implode(',', array_fill(0, count($items), '?'));
+            $stmt = $this->getPdo()->prepare("UPDATE items SET status = 'Not available' WHERE id IN ($placeholders)");
+            $stmt->execute($items);
+        }
+
+        $this->view->render(['message' => 'Reservation rented successfully'], 200);
     }
 }
