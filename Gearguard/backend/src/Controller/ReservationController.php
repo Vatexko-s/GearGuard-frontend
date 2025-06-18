@@ -77,10 +77,11 @@ class ReservationController
 
         $reservationModel = new ReservationModel();
         $uuid = Uuid::fromString($userId);
-        $statuses = ['reserved', 'rented'];
+        $statuses = ['Reserved', 'Rented'];
         $reservations = $reservationModel->getByUserIdAndStatuses($uuid, $statuses);
 
-        $this->view->render($reservations);
+        // Ensure an empty array is returned if no reservations are found
+        $this->view->render($reservations ?: []);
     }
 
     public function create(): void
@@ -128,7 +129,7 @@ class ReservationController
 
         // Validate status
         if (empty($body['status'])) {
-            $body['status'] = 'reserved';
+            $body['status'] = 'Reserved';
         } elseif (!in_array($body['status'], ['returned', 'rented', 'reserved'], true)) {
             $this->view->render(['error' => 'Invalid status. Allowed values are returned, rented, or reserved.'], 400);
             return;
@@ -355,7 +356,12 @@ class ReservationController
         }
 
         // Check if the item is already in another reservation
-        if ($reservationModel->isItemInAnotherReservation($itemId, $reservationUuid)) {
+        if ($reservationModel->isItemInAnotherReservation(
+            $itemId,
+            $reservationUuid,
+            $reservation->getStartDate(),
+            $reservation->getEndDate()
+        )) {
             $this->view->render(['error' => 'Item is already in another reservation'], 400);
             return;
         }
@@ -369,11 +375,31 @@ class ReservationController
         }
 
         // Add the item to the reservation
-        if ($reservationModel->addItemToReservation($reservationUuid, Uuid::fromString($itemId))) {
-            $this->view->render(['message' => 'Item added to reservation'], 200);
-        } else {
+        if (!$reservationModel->addItemToReservation($reservationUuid, Uuid::fromString($itemId))) {
             $this->view->render(['error' => 'Failed to add item to reservation'], 500);
+            return;
         }
+
+        // Create a record in the item_availability table
+        $availabilityStmt = $this->getPdo()->prepare(
+            "INSERT INTO item_availability (item_id, reservation_id, start_date, end_date, state)
+         VALUES (:item_id, :reservation_id, :start_date, :end_date, :state)"
+        );
+
+        $availabilitySuccess = $availabilityStmt->execute([
+            ':item_id' => $itemId,
+            ':reservation_id' => $reservationId,
+            ':start_date' => $reservation->getStartDate(),
+            ':end_date' => $reservation->getEndDate(),
+            ':state' => 'Reserved',
+        ]);
+
+        if (!$availabilitySuccess) {
+            $this->view->render(['error' => 'Failed to create item availability record'], 500);
+            return;
+        }
+
+        $this->view->render(['message' => 'Item added to reservation and availability record created'], 201);
     }
 
     private function validateReservationData(array $data): array

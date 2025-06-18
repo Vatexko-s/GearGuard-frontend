@@ -4,13 +4,14 @@ import React, { useState, useEffect } from 'react';
 import ReservationCard from '@/app/components/reservationCard';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useToast } from '@/app/contexts/ToastService';
+import { useReservation } from '@/app/contexts/ReservationContext';
 import { AlertCircle, CheckCircle } from 'react-feather';
 
 interface Reservation {
-  id: string; // UUID
+  id: string;
   start_date?: string;
   end_date?: string;
-  items: string[]; // Array of item UUIDs
+  items: string[];
   status: 'reserved' | 'rented' | 'returned';
 }
 
@@ -18,6 +19,7 @@ const Reservations: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const { token } = useAuth();
   const toast = useToast();
+  const { setCurrentReservation } = useReservation();
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -76,6 +78,21 @@ const Reservations: React.FC = () => {
     }
   };
 
+  const handleSelectReservation = (reservationId: string) => {
+    const selectedReservation = reservations.find((reservation) => reservation.id === reservationId);
+
+    if (selectedReservation) {
+      setCurrentReservation(
+        reservationId,
+        selectedReservation.start_date || null,
+        selectedReservation.end_date || null
+      );
+      handleSuccess(`Selected reservation: ${reservationId}`);
+    } else {
+      handleError(`Reservation with ID ${reservationId} not found`);
+    }
+  };
+
   const handleCancelReservation = async (reservationId: string) => {
     try {
       const response = await fetch(`http://127.0.0.1:8081/api/v1/reservations/${reservationId}`, {
@@ -93,34 +110,11 @@ const Reservations: React.FC = () => {
       setReservations((prevReservations) =>
         prevReservations.filter((reservation) => reservation.id !== reservationId)
       );
+
+      // Reset ReservationContext values to null
+      setCurrentReservation(null, null, null);
+
       handleSuccess('Reservation canceled successfully');
-    } catch (err) {
-      handleError(err instanceof Error ? err.message : 'An unknown error occurred');
-    }
-  };
-
-  const handleRentReservation = async (reservationId: string) => {
-    try {
-      const response = await fetch(`http://127.0.0.1:8081/api/v1/reservations/${reservationId}/rent`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to rent reservation: ${response.status}`);
-      }
-
-      const data = await response.json();
-      handleSuccess(data.message);
-
-      setReservations((prevReservations) =>
-        prevReservations.map((reservation) =>
-          reservation.id === reservationId ? { ...reservation, status: 'rented' } : reservation
-        )
-      );
     } catch (err) {
       handleError(err instanceof Error ? err.message : 'An unknown error occurred');
     }
@@ -201,9 +195,10 @@ const Reservations: React.FC = () => {
           <ReservationCard
             key={reservation.id}
             reservation={reservation}
-            onRent={handleRentReservation}
+            onRent={() => {}}
             onReturn={() => {}}
             onCancel={handleCancelReservation}
+            onSelect={handleSelectReservation} // Pass the onSelect prop
           />
         ))}
       </ul>

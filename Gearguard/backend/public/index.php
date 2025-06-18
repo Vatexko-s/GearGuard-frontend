@@ -44,6 +44,7 @@ $router->get('/api/v1/items/category/{categoryName:string}', ItemController::cla
 $router->get('/api/v1/items/{id:uuid}', ItemController::class, 'getById');
 $router->put('/api/v1/items/{id:uuid}', ItemController::class, 'update');
 $router->delete('/api/v1/items/{id:uuid}', ItemController::class, 'delete');
+$router->post('/api/v1/items/category/{categoryName:string}/availability', ItemController::class, 'getAvailabilityByCategory');
 
 $router->get('/api/v1/reservations', ReservationController::class, 'getByUserId');
 $router->post('/api/v1/reservations', ReservationController::class, 'create');

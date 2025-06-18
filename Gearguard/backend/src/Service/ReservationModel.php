@@ -77,7 +77,7 @@ class ReservationModel
                 ':user_id' => $data['user_id'],
                 ':start_date' => $data['start_date'],
                 ':end_date' => $data['end_date'],
-                ':status' => $data['status'] ?? 'reserved',
+                ':status' => $data['status'] ?? 'Reserved',
             ]);
 
             // Extract item IDs from the items array
@@ -121,9 +121,15 @@ class ReservationModel
         $this->pdo->beginTransaction();
 
         try {
+            // Delete records from item_availability table
+            $availabilityStmt = $this->pdo->prepare("DELETE FROM item_availability WHERE reservation_id = :reservation_id");
+            $availabilityStmt->execute([':reservation_id' => $id->toString()]);
+
+            // Delete records from reservation_items table
             $itemStmt = $this->pdo->prepare("DELETE FROM reservation_items WHERE reservation_id = :reservation_id");
             $itemStmt->execute([':reservation_id' => $id->toString()]);
 
+            // Delete the reservation itself
             $stmt = $this->pdo->prepare("DELETE FROM reservations WHERE id = :id");
             $stmt->execute([':id' => $id->toString()]);
 
@@ -157,25 +163,52 @@ class ReservationModel
 
     public function getByUserIdAndStatuses(UuidInterface $userId, array $statuses): array
     {
+        if (empty($statuses)) {
+            error_log('Statuses array is empty.');
+            return [];
+        }
+
         $placeholders = implode(',', array_fill(0, count($statuses), '?'));
         $sql = "SELECT * FROM reservations WHERE user_id = ? AND status IN ($placeholders)";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(array_merge([$userId->toString()], $statuses));
-        $rows = $stmt->fetchAll();
 
-        return array_map(function ($data) {
-            $data['items'] = $this->getItemsByReservationId(Uuid::fromString($data['id']));
-            return $this->hydrateReservation($data);
-        }, $rows);
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(array_merge([$userId->toString()], $statuses));
+            $rows = $stmt->fetchAll();
+
+            if (empty($rows)) {
+                error_log('No reservations found for user_id: ' . $userId->toString());
+                return [];
+            }
+
+            return array_map(function ($data) {
+                $data['items'] = $this->getItemsByReservationId(Uuid::fromString($data['id']));
+                return $this->hydrateReservation($data);
+            }, $rows);
+        } catch (\PDOException $e) {
+            error_log('Database error: ' . $e->getMessage());
+            return [];
+        }
     }
 
-    public function isItemInAnotherReservation(string $itemId, ?UuidInterface $currentReservationId): bool
+    public function isItemInAnotherReservation(string $itemId, ?UuidInterface $currentReservationId, string $startDate, string $endDate): bool
     {
-        $query = "SELECT COUNT(*) FROM reservation_items WHERE item_id = :item_id";
-        $params = [':item_id' => $itemId];
+        $query = "
+        SELECT COUNT(*) 
+        FROM reservation_items ri
+        JOIN reservations r ON ri.reservation_id = r.id
+        WHERE ri.item_id = :item_id
+          AND r.start_date < :end_date
+          AND r.end_date > :start_date
+    ";
+        $params = [
+            ':item_id' => $itemId,
+            ':start_date' => $startDate,
+            ':end_date' => $endDate,
+        ];
 
         if ($currentReservationId !== null) {
-            $query .= " AND reservation_id != :reservation_id";
+            $query .= " AND ri.reservation_id != :reservation_id";
             $params[':reservation_id'] = $currentReservationId->toString();
         }
 

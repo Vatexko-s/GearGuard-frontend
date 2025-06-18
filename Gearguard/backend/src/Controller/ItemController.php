@@ -161,4 +161,32 @@ class ItemController
             $this->view->render(['error' => 'Item not found'], 404);
         }
     }
+
+    public function getAvailabilityByCategory(string $category): void
+    {
+        $body = json_decode(file_get_contents('php://input'), true);
+
+        if (empty($category) || !is_string($category)) {
+            $this->view->render(['error' => 'Invalid category'], 400);
+            return;
+        }
+
+        if (empty($body['start_date']) || empty($body['end_date']) || !strtotime($body['start_date']) || !strtotime($body['end_date'])) {
+            $this->view->render(['error' => 'Invalid start_date or end_date'], 400);
+            return;
+        }
+
+        $startDate = $body['start_date'];
+        $endDate = $body['end_date'];
+
+        $itemModel = new ItemModel();
+        $items = $itemModel->getAvailabilityByCategory($category, $startDate, $endDate);
+
+        if (empty($items)) {
+            $this->view->render(['error' => 'No items found for the given category and date range'], 404);
+            return;
+        }
+
+        $this->view->render($items);
+    }
 }

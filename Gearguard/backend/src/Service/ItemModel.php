@@ -101,9 +101,44 @@ class ItemModel
         $item->setName($data['name']);
         $item->setDescription($data['description']);
         $item->setCategory($data['category']);
-        $item->setStatus($data['status']);
-        $item->setUpdatedAt($data['updated_at']);
+        $item->setStatus($data['status'] ?? 'Available'); // Default to "Available" if status is missing
+        $item->setUpdatedAt($data['updated_at'] ?? date('Y-m-d H:i:s')); // Default to current timestamp if missing
 
         return $item;
+    }
+
+    public function getAvailabilityByCategory(string $category, string $startDate, string $endDate): array
+    {
+        $sql = "
+        SELECT i.id, i.name, i.description, i.category, 
+               COALESCE(
+                   MAX(
+                       CASE
+                           WHEN ia.start_date <= :end_date AND ia.end_date >= :start_date THEN ia.state
+                           ELSE NULL
+                       END
+                   ),
+                   'Available'
+               ) AS state
+        FROM items i
+        LEFT JOIN item_availability ia ON i.id = ia.item_id
+        WHERE i.category = :category
+        GROUP BY i.id, i.name, i.description, i.category
+    ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':category' => $category,
+            ':start_date' => $startDate,
+            ':end_date' => $endDate,
+        ]);
+
+        $rows = $stmt->fetchAll();
+
+        return array_map(function ($row) {
+            $item = $this->hydrateItem($row);
+            $item->setStatus($row['state']); // Set status based on availability
+            return $item;
+        }, $rows);
     }
 }

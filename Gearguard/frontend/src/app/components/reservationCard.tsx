@@ -21,6 +21,7 @@ interface ReservationProps {
   onRent: (reservationId: string) => void;
   onReturn: (reservationId: string) => void;
   onCancel: (reservationId: string) => void;
+  onSelect: (reservationId: string) => void; // New prop for selecting a reservation
 }
 
 const formatDate = (dateString?: string): string => {
@@ -34,6 +35,7 @@ const ReservationCard: React.FC<ReservationProps> = ({
                                                        onRent,
                                                        onReturn,
                                                        onCancel,
+                                                       onSelect, // Destructure the new prop
                                                      }) => {
   const [fetchedItems, setFetchedItems] = useState<ItemData[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -55,11 +57,7 @@ const ReservationCard: React.FC<ReservationProps> = ({
             }
 
             const item = await response.json();
-
-            // Update item status to "Rented" if it belongs to the user's reservation and is "Not available"
-            return item.status === 'Not available' && reservation.status === 'rented'
-              ? { ...item, status: 'Rented' }
-              : item;
+            return item;
           })
         );
 
@@ -70,7 +68,7 @@ const ReservationCard: React.FC<ReservationProps> = ({
     };
 
     fetchItems();
-  }, [JSON.stringify(reservation.items), reservation.status]);
+  }, [JSON.stringify(reservation.items)]);
 
   return (
     <li className="mb-4 p-4 border rounded shadow">
@@ -112,10 +110,18 @@ const ReservationCard: React.FC<ReservationProps> = ({
       )}
       <button
         onClick={() => onCancel(reservation.id)}
-        className={`mt-1 px-4 py-2 rounded mb-2 ${reservation.status === 'rented' ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 text-white'}`}
+        className={`mt-1 px-4 py-2 rounded mb-2 ${
+          reservation.status === 'rented' ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 text-white'
+        }`}
         disabled={reservation.status === 'rented'}
       >
         Cancel
+      </button>
+      <button
+        onClick={() => onSelect(reservation.id)} // Call the onSelect function
+        className="mt-1 px-4 py-2 bg-blue-500 text-white rounded mb-2"
+      >
+        Select
       </button>
     </li>
   );
