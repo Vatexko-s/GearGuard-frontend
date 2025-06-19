@@ -87,28 +87,37 @@ class AuthController
      */
     public function create(): void
     {
-        // test this request comes from authorized client application
-        if(!$this->validateClientApplication()) {;
+        if (!$this->validateClientApplication()) {
             return;
         }
-        
+
         // Get the request body
         $body = file_get_contents('php://input');
         $bodyData = json_decode($body, true);
-        
-        // Check if the request body contains the required fields
-        if (!isset($bodyData['identity']) || !isset($bodyData['secret'])) {
-            $this->view->render(['error' => 'Invalid request'], 400);
+
+        // Validate the request body
+        if (
+            !isset($bodyData['identity']) ||
+            !is_string($bodyData['identity']) ||
+            trim($bodyData['identity']) === '' ||
+            strlen($bodyData['identity']) < 3 ||
+            !isset($bodyData['secret']) ||
+            !is_string($bodyData['secret']) ||
+            trim($bodyData['secret']) === '' ||
+            strlen($bodyData['secret']) < 6
+        ) {
+            $this->view->render(['error' => 'Invalid request: identity and secret must meet requirements'], 400);
+            return;
         }
-        
-        // submit to the UserModel
+
+        // Submit to the UserModel
         try {
             $user = $this->userModel->createUser($bodyData['identity'], $bodyData['secret']);
         } catch (\Exception $e) {
             $this->view->render(['error' => 'User already exists'], 409);
             return;
         }
-        
+
         $this->view->render($user);
     }
     

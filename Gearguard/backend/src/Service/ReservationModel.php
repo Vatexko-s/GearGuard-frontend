@@ -200,6 +200,7 @@ class ReservationModel
         WHERE ri.item_id = :item_id
           AND r.start_date < :end_date
           AND r.end_date > :start_date
+          AND r.status != 'Returned'
     ";
         $params = [
             ':item_id' => $itemId,
@@ -241,5 +242,23 @@ class ReservationModel
         $reservation->setItems($data['items'] ?? []);
 
         return $reservation;
+    }
+
+    public function getItemsWithDetailsByReservationId(UuidInterface $reservationId): array
+    {
+        $sql = "
+        SELECT i.id, i.category, i.name, i.description, ia.state AS status
+        FROM items i
+        JOIN reservation_items ri ON i.id = ri.item_id
+        JOIN reservations r ON ri.reservation_id = r.id
+        JOIN item_availability ia ON i.id = ia.item_id
+        WHERE ri.reservation_id = :reservation_id
+          AND ia.start_date <= r.end_date
+          AND ia.end_date >= r.start_date
+    ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':reservation_id' => $reservationId->toString()]);
+        return $stmt->fetchAll();
     }
 }

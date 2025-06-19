@@ -1,19 +1,22 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { Icon } from '@iconify/react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ItemData {
   id: string; // UUID
+  category: string;
   name: string;
-  status: 'Available' | 'Not available' | 'Reserved' | 'Rented';
+  description: string;
+  status: 'Available' | 'Not Available' | 'Reserved' | 'Rented';
 }
 
 interface Reservation {
   id: string; // UUID
   start_date?: string;
   end_date?: string;
-  items: string[]; // Array of item UUIDs
-  status: 'reserved' | 'rented' | 'returned';
+  status: 'Reserved' | 'Rented' | 'Returned';
 }
 
 interface ReservationProps {
@@ -21,7 +24,7 @@ interface ReservationProps {
   onRent: (reservationId: string) => void;
   onReturn: (reservationId: string) => void;
   onCancel: (reservationId: string) => void;
-  onSelect: (reservationId: string) => void; // New prop for selecting a reservation
+  onSelect: (reservationId: string) => void;
 }
 
 const formatDate = (dateString?: string): string => {
@@ -35,40 +38,74 @@ const ReservationCard: React.FC<ReservationProps> = ({
                                                        onRent,
                                                        onReturn,
                                                        onCancel,
-                                                       onSelect, // Destructure the new prop
+                                                       onSelect,
                                                      }) => {
+  const { token } = useAuth();
   const [fetchedItems, setFetchedItems] = useState<ItemData[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const itemsData: ItemData[] = await Promise.all(
-          reservation.items.map(async (itemId) => {
-            const response = await fetch(`http://127.0.0.1:8081/api/v1/items/${itemId}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
-
-            if (!response.ok) {
-              throw new Error(`Failed to fetch item with ID: ${itemId}`);
-            }
-
-            const item = await response.json();
-            return item;
-          })
+        const response = await fetch(
+          `http://127.0.0.1:8081/api/v1/reservations/${reservation.id}/items`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
         );
 
-        setFetchedItems(itemsData);
+        if (!response.ok) {
+          throw new Error(`No items found for the reservation`);
+        }
+
+        const itemsData: ItemData[] = await response.json();
+        if (itemsData.length === 0) {
+          setError('No items found for this reservation.');
+        } else {
+          setFetchedItems(itemsData);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
       }
     };
 
     fetchItems();
-  }, [JSON.stringify(reservation.items)]);
+  }, [reservation.id, token]);
+
+  const deleteItem = async (itemId: string) => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8081/api/v1/reservations/${reservation.id}/items/${itemId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to delete the item.');
+      }
+
+      setFetchedItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+    }
+  };
+
+  const groupedItems = fetchedItems.reduce((acc, item) => {
+    if (!acc[item.category]) {
+      acc[item.category] = [];
+    }
+    acc[item.category].push(item);
+    return acc;
+  }, {} as Record<string, ItemData[]>);
 
   return (
     <li className="mb-4 p-4 border rounded shadow">
@@ -77,52 +114,80 @@ const ReservationCard: React.FC<ReservationProps> = ({
         From: {formatDate(reservation.start_date)} To: {formatDate(reservation.end_date)}
       </p>
       <p>Status: {reservation.status}</p>
-      {error && <p className="text-red-500">Error: {error}</p>}
+      {error && <p className="text-red-500 font-semibold">{error}</p>}
       <div className="mt-2">
-        {fetchedItems.map((item) => (
-          <div key={item.id} className="flex items-center gap-2">
-            <span>{item.name}</span>
-            <span
-              className={`text-sm font-semibold ${
-                item.status === 'Rented' ? 'text-green-500' : 'text-orange-500'
-              }`}
-            >
-              {item.status}
-            </span>
+        {Object.entries(groupedItems).map(([category, items]) => (
+          <div key={category} className="mb-4">
+            <h3 className="text-lg font-semibold">{category}</h3>
+            {items.map((item) => (
+              <div key={item.id} className="flex items-center gap-2">
+                <span>{item.name}</span>
+                <span
+                  className={`text-sm font-semibold ${
+                    reservation.status === 'Rented' && item.status === 'Not Available'
+                      ? 'text-green-500'
+                      : item.status === 'Rented'
+                        ? 'text-green-500'
+                        : 'text-orange-500'
+                  }`}
+                >
+                  {reservation.status === 'Rented' && item.status === 'Not Available'
+                    ? 'Rented'
+                    : item.status}
+                </span>
+                {reservation.status !== 'Rented' && (
+                  <button
+                    onClick={() => deleteItem(item.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Icon icon="lucide:trash-2" width="20" height="20" />
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         ))}
       </div>
-      {reservation.status === 'reserved' && (
+      <div className="flex flex-wrap gap-2 mt-2">
+        {reservation.status === 'Reserved' && (
+          <button
+            onClick={() => onRent(reservation.id)}
+            className="px-4 py-2 w-32 bg-green-500 text-white rounded flex items-center justify-center gap-2"
+          >
+            <Icon icon="lucide:check-circle" width="20" height="20" />
+            Rent
+          </button>
+        )}
+        {reservation.status === 'Rented' && (
+          <button
+            onClick={() => onReturn(reservation.id)}
+            className="px-4 py-2 w-32 bg-yellow-500 text-white rounded flex items-center justify-center gap-2"
+          >
+            <Icon icon="lucide:undo-2" width="20" height="20" />
+            Return
+          </button>
+        )}
         <button
-          onClick={() => onRent(reservation.id)}
-          className="mr-2 mt-1 px-4 py-2 bg-green-500 text-white rounded mb-2"
+          onClick={() => onCancel(reservation.id)}
+          className={`px-4 py-2 w-32 rounded flex items-center justify-center gap-2 ${
+            reservation.status === 'Rented' ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 text-white'
+          }`}
+          disabled={reservation.status === 'Rented'}
         >
-          Rent
+          <Icon icon="lucide:circle-x" width="20" height="20" />
+          Cancel
         </button>
-      )}
-      {reservation.status === 'rented' && (
         <button
-          onClick={() => onReturn(reservation.id)}
-          className="mr-2 mt-1 px-4 py-2 bg-yellow-500 text-white rounded mb-2"
+          onClick={() => onSelect(reservation.id)}
+          className={`px-4 py-2 w-32 rounded flex items-center justify-center gap-2 ${
+            reservation.status === 'Rented' ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 text-white'
+          }`}
+          disabled={reservation.status === 'Rented'}
         >
-          Return
+          <Icon icon="lucide:square-mouse-pointer" width="20" height="20" />
+          Select
         </button>
-      )}
-      <button
-        onClick={() => onCancel(reservation.id)}
-        className={`mt-1 px-4 py-2 rounded mb-2 ${
-          reservation.status === 'rented' ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 text-white'
-        }`}
-        disabled={reservation.status === 'rented'}
-      >
-        Cancel
-      </button>
-      <button
-        onClick={() => onSelect(reservation.id)} // Call the onSelect function
-        className="mt-1 px-4 py-2 bg-blue-500 text-white rounded mb-2"
-      >
-        Select
-      </button>
+      </div>
     </li>
   );
 };

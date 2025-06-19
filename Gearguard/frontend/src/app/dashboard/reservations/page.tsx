@@ -12,7 +12,7 @@ interface Reservation {
   start_date?: string;
   end_date?: string;
   items: string[];
-  status: 'reserved' | 'rented' | 'returned';
+  status: 'Reserved' | 'Rented' | 'Returned';
 }
 
 const Reservations: React.FC = () => {
@@ -120,6 +120,69 @@ const Reservations: React.FC = () => {
     }
   };
 
+  const handleRentReservation = async (reservationId: string) => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8081/api/v1/reservations/${reservationId}/rent`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to rent reservation: ${response.status}`);
+      }
+
+      // Update the reservation status locally
+      setReservations((prevReservations) =>
+        prevReservations.map((reservation) =>
+          reservation.id === reservationId
+            ? { ...reservation, status: 'Rented' }
+            : reservation
+        )
+      );
+
+      // Reset ReservationContext values to null
+      setCurrentReservation(null, null, null);
+
+      handleSuccess('Reservation rented successfully');
+    } catch (err) {
+      handleError(err instanceof Error ? err.message : 'An unknown error occurred');
+    }
+  };
+
+  const handleReturnReservation = async (reservationId: string) => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8081/api/v1/reservations/${reservationId}/return`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to return reservation: ${response.status}`);
+      }
+
+      // Remove the returned reservation from the list
+      setReservations((prevReservations) =>
+        prevReservations.filter((reservation) => reservation.id !== reservationId)
+      );
+
+      handleSuccess('Reservation returned successfully');
+    } catch (err) {
+      handleError(err instanceof Error ? err.message : 'An unknown error occurred');
+    }
+  };
+
   const handleError = (message: string) => {
     if (toast) {
       toast.open(
@@ -195,10 +258,10 @@ const Reservations: React.FC = () => {
           <ReservationCard
             key={reservation.id}
             reservation={reservation}
-            onRent={() => {}}
-            onReturn={() => {}}
+            onRent={handleRentReservation}
+            onReturn={handleReturnReservation} // Pass the new function here
             onCancel={handleCancelReservation}
-            onSelect={handleSelectReservation} // Pass the onSelect prop
+            onSelect={handleSelectReservation}
           />
         ))}
       </ul>
